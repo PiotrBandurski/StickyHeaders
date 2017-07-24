@@ -32,9 +32,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         layoutManager.setStickyHeaderListener(new StickyHeaderListener() {
+
             @Override
-            public void headerAttached(View headerView, int adapterPosition) {
+            public void headerWillBeAttached(View headerView, int adapterPosition) {
                 Log.d("Listener", "Attached with position: " + adapterPosition);
+
+            }
+
+            @Override
+            public void headerAttached(View headerView) {
+
             }
 
             @Override

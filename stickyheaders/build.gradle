@@ -69,7 +69,7 @@ task createPom {
         project {
             groupId 'com.brandongogetap.stickyheaders'
             artifactId 'stickyheaders'
-            version '0.5-PiotrBandurskiEdyszyn'
+            version '0.5-StepstoneRemix'
             packaging 'aar'
         }
     }.withXml {

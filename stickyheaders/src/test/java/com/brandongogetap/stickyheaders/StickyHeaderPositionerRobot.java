@@ -85,7 +85,7 @@ final class StickyHeaderPositionerRobot {
         positioner.attachHeader(viewHolder, headerPosition);
         InOrder inOrder = inOrder(listener);
         inOrder.verify(listener, times(1)).headerDetached(currentHeader, lastPosition);
-        inOrder.verify(listener, times(1)).headerAttached(currentHeader, headerPosition);
+        inOrder.verify(listener, times(1)).headerWillBeAttached(currentHeader, headerPosition);
         return this;
     }
 
@@ -100,7 +100,7 @@ final class StickyHeaderPositionerRobot {
         InOrder inOrder = inOrder(listener);
         positioner.attachHeader(otherViewHolder, headerPosition);
         inOrder.verify(listener, times(1)).headerDetached(currentHeader, lastPosition);
-        inOrder.verify(listener, times(1)).headerAttached(otherView, headerPosition);
+        inOrder.verify(listener, times(1)).headerWillBeAttached(otherView, headerPosition);
         return this;
     }
 

@@ -14,19 +14,27 @@ import com.brandongogetap.stickyheaders.StickyLayoutManager;
 public interface StickyHeaderListener {
 
     /**
-     * Called when a Sticky Header has been attached or rebound.
+     * Called when a Sticky Header has been attached or rebound but is not drawed on screen.
      *
      * @param headerView      The view that is currently attached as the sticky header
      * @param adapterPosition The position in the adapter data set that this view represents
      */
-    void headerAttached(View headerView, int adapterPosition);
+    void headerWillBeAttached(View headerView, int adapterPosition);
+
+
+    /**
+     * Called when a Sticky Header has been attached or rebound and is drawed on screen.
+     *
+     * @param headerView      The view that is currently attached as the sticky header
+     */
+    void headerAttached(View headerView);
 
     /**
      * Called when a Sticky Header has been detached or is about to be re-bound.
      * <p>
      * For performance reasons, if the new Sticky Header that will be replacing the current one is
      * of the same view type, the view is reused. In that case, this call will be immediately followed
-     * by a call to {@link StickyHeaderListener#headerAttached(View, int)} with the same view instance,
+     * by a call to {@link com.brandongogetap.stickyheaders.exposed.StickyHeaderListener#headerWillBeAttached(View, int)} with the same view instance,
      * but after the view is re-bound with the new adapter data.
      * <p>
      * <b>Important</b><br/>
@@ -44,3 +52,4 @@ public interface StickyHeaderListener {
      */
     void headerDetached(View headerView, int adapterPosition);
 }
+

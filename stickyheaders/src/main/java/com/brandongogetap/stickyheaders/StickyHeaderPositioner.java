@@ -28,7 +28,7 @@ final class StickyHeaderPositioner {
     private final boolean checkMargins;
     private final boolean fallbackReset;
 
-    private View currentHeader;
+    View currentHeader;
     private int lastBoundPosition = INVALID_POSITION;
     private List<Integer> headerPositions;
     private int orientation;
@@ -106,6 +106,7 @@ final class StickyHeaderPositioner {
         }
     }
 
+    private boolean wasWaitingForLayout;
     // This checks visible headers and their positions to determine if the sticky header needs
     // to be offset. In reality, only the header following the sticky header is checked. Some
     // optimization may be possible here (not storing all visible headers in map).
@@ -114,8 +115,13 @@ final class StickyHeaderPositioner {
         // This can happen after configuration changes.
         if (currentHeader.getHeight() == 0) {
             waitForLayoutAndRetry(visibleHeaders);
+            wasWaitingForLayout = true;
             return;
+        }else if (wasWaitingForLayout){
+            wasWaitingForLayout = false;
+            //callAttach();
         }
+
         boolean reset = false;
         for (Map.Entry<Integer, View> entry : visibleHeaders.entrySet()) {
             if (entry.getKey() == lastBoundPosition) {
@@ -203,7 +209,7 @@ final class StickyHeaderPositioner {
             callDetach(lastBoundPosition);
             //noinspection unchecked
             recyclerView.getAdapter().onBindViewHolder(currentViewHolder, headerPosition);
-            callAttach(headerPosition);
+            callWillAttach(headerPosition);
             updateCurrentHeader = false;
             return;
         }
@@ -214,7 +220,7 @@ final class StickyHeaderPositioner {
         recyclerView.getAdapter().onBindViewHolder(currentViewHolder, headerPosition);
         this.currentHeader = currentViewHolder.itemView;
         currentHeader.setClickable(true);
-        callAttach(headerPosition);
+        callWillAttach(headerPosition);
         resolveElevationSettings(currentHeader.getContext());
         // Set to Invisible until we position it in #checkHeaderPositions.
         currentHeader.setVisibility(View.INVISIBLE);
@@ -265,13 +271,19 @@ final class StickyHeaderPositioner {
         }
     }
 
-    private void callAttach(int position) {
+    private void callWillAttach(int position) {
         if (listener != null) {
-            listener.headerAttached(currentHeader, position);
+            listener.headerWillBeAttached(currentHeader, position);
         }
     }
 
-    private void callDetach(int position) {
+    void callAttach() {
+        if (listener != null) {
+            listener.headerAttached(currentHeader);
+        }
+    }
+
+    void callDetach(int position) {
         if (listener != null) {
             listener.headerDetached(currentHeader, position);
         }
@@ -337,8 +349,14 @@ final class StickyHeaderPositioner {
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        // If header was removed during layout
-                        if (currentHeader == null) return;
+                        // If header was removed during layout=
+                        if (currentHeader == null) {
+                            return;
+                        }
+                        callAttach();
+                        if (currentHeader == null) { //can occur when on listener in #callAttach() will scroll recyclerview to hide header which will also destroy him
+                            return;
+                        }
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                             currentHeader.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -351,6 +369,7 @@ final class StickyHeaderPositioner {
                     }
                 });
     }
+
 
     /**
      * Detaching while {@link StickyLayoutManager} is laying out children can cause an inconsistent
